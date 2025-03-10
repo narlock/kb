@@ -1,0 +1,19 @@
+Save the files as "kanban_board_name.kb"
+
+Inside of each file we will house a json data structure:
+
+{
+    "board": {
+        name: "string",
+        columns: ["todo", "doing", "done"]
+        column_colors: ["WHITE", "CYAN", "GREEN"]
+    },
+    "items": [
+        {
+            "id": 0,
+            "title": "My Example and fun task"
+            "priority": 2,
+            "narly": "string" 
+        }
+    ]
+}
