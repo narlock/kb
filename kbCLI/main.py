@@ -11,6 +11,7 @@ import sys
 import os
 import json
 import tty, termios  # For keypress detection on Unix
+import settings
 
 # Development information
 DEV_NAME = "narlock"
@@ -105,6 +106,7 @@ def show_help():
 # Main function
 def main():
     args = sys.argv[1:]
+    user_settings = settings.load_settings()
 
     if not args:
         interactive_menu()
