@@ -32,6 +32,7 @@ MAGENTA = "\033[35m"
 CYAN = "\033[36m"
 WHITE = "\033[37m"
 ORANGE = ansi_rgb(255, 165, 0)
+GREY = ansi_rgb(54, 54, 54)
 
 # Bright ANSI Colors
 BRIGHT_BLACK = "\033[90m"

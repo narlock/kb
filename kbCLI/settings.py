@@ -13,6 +13,7 @@ from pathlib import Path
 SETTINGS_PATH = Path.home() / "Documents" / "narlock" / "kb" / "settings.json"
 
 INITIAL_SETTINGS = {
+    "recentProjectTitle": "kb",
     "projects": [
         {
             "id": 0,
