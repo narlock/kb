@@ -101,3 +101,30 @@ def load_settings():
         print(f"Error loading settings: {e}. Resetting to default.")
         write_initial_settings()
         return INITIAL_SETTINGS
+    
+def generate_task_map_for_project(settings, project_title):
+    """
+    Given the settings object and a title of a project, this function
+    will return a map of each of the tasks within the todo, doing
+    and done columns respectively.
+
+    This function will be called and recalled to display updates
+    to the kanban view of the program.
+    """
+    task_map = {
+        "todo": [],
+        "doing": [],
+        "done": []
+    }
+
+    for project in settings.get("projects", []):
+        if project.get("title") == project_title:
+            for task in project.get("tasks", []):
+                status = task.get("status", "").lower()
+                if status in task_map:
+                    task_map[status].append((task["id"], task["title"]))
+                else:
+                    task_map.setdefault(status, []).append((task["id"], task["title"]))
+            break  # Found the project, no need to keep looping
+
+    return task_map

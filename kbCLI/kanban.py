@@ -1,4 +1,5 @@
 import shutil, os, textwrap, sys, ansi
+import settings
 
 def print_kanban_columns(
     todo,
@@ -122,10 +123,24 @@ def print_kanban_columns(
     sys.stdout.write("\n".join(lines))
     sys.stdout.flush()
 
-# demo
-todo  = [(1, "Write spec"), (2, "Set up repo")]
-doing = [(3, "Implement core logic with a really long description")]
-done  = [(4, "Kick-off"), (5, "Brainstorm"), (6, "Sign-off")]
+def display_kanban(user_settings, project_title: str):
+    """
+    Displays the kanban board based on the input project_title
+    """
 
-print_kanban_columns(todo, doing, done, project_title="My First Project")
-input("\n>> ")  # room for input commands
+    # Obtain task map
+    task_map = settings.generate_task_map_for_project(user_settings, project_title)
+    todo = task_map['todo']
+    doing = task_map['doing']
+    done = task_map['done']
+
+    # Print kanban to screen
+    print_kanban_columns(todo, doing, done, project_title)
+
+def display_interactive_kanban(user_settings, project_title):
+    while True:
+        display_kanban(user_settings, project_title)
+        
+        # TODO add input interface options for kanban
+        input(">> ")
+        

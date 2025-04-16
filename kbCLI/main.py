@@ -13,6 +13,7 @@ import json
 import tty, termios  # For keypress detection on Unix
 import settings
 import time
+import kanban
 
 # Development information
 DEV_NAME = "narlock"
@@ -73,21 +74,17 @@ def interactive_menu(user_settings):
             selected_index = (selected_index - 1) % 5
         elif key == KEY_DOWN:  # Down arrow
             selected_index = (selected_index + 1) % 5
-        # elif key in KEY_ENTER:  # Enter key
-        #     if input_text:
-        #         create_board(input_text)
-        #         input_text = ""
-        #     else:
-        #         print(f"{ansi.GREEN}Opening board: {boards[selected_index]}{ansi.RESET}")
-        # elif key.isdigit() and 0 <= int(key) < min(10, len(boards)):
-        #     print(f"{ansi.GREEN}Opening board: {boards[int(key)]}{ansi.RESET}")
+        elif key in KEY_ENTER:  # Enter key
+            if selected_index == 0:
+                kanban.display_interactive_kanban(user_settings, user_settings['recentProjectTitle'])
+                return
         elif key.isalnum() or key in (' ', '-', '_'):
             input_text += key
         elif key in KEY_BACKSPACE:  # Backspace
             input_text = input_text[:-1]
 
 def get_title_text(user_settings, selected_index: int) -> str:
-    """Return the banner + menu, with the selected line in bright‑green bold."""
+    """Return the banner + menu, with the selected line in bright-green bold."""
     
     # Static banner
     lines = [
