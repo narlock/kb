@@ -168,4 +168,4 @@ def move_kanban_item_by_id(user_settings, project_title, item_id: int, column: s
         new_status = column
 
     task["status"] = new_status
-    print(f"Moved task {item_id} to '{new_status}' column.")
+    update_settings(user_settings)
