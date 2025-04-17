@@ -66,7 +66,7 @@ def interactive_menu(user_settings):
         
         key = kbutils.get_keypress()
         
-        if key == EXIT_CMD:  # Ctrl+Q to exit
+        if key == EXIT_CMD:  # Ctrl+C to exit
             print(f"{ansi.RED}Exiting Kanban CLI...{ansi.RESET}")
             os.system('clear')
             sys.exit(0)

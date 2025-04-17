@@ -9,6 +9,13 @@ import ansi
 # Regex to remove ANSI escape sequences
 ANSI_ESCAPE = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
 
+# Keybindings
+KEY_UP = "\x1b[A"
+KEY_DOWN = "\x1b[B"
+KEY_ENTER = ('\r', '\n')
+KEY_BACKSPACE = ('\x08', '\x7f')
+EXIT_CMD = "\x03"  # Ctrl+C
+
 def strip_ansi(text):
     return ANSI_ESCAPE.sub('', text)
 
@@ -40,7 +47,15 @@ def print_bottom_input(input_text):
 
     # Move to the bottom row, column 1
     print(f"\033[{height};1H", end="")  # Position cursor
-    print(f"\033[33m>> {input_text}\033[0m", end="", flush=True)
+    print(f"{ansi.RESET}>> {input_text}{ansi.RESET}", end="", flush=True)
+
+def print_bottom_input_with_mode_and_error(input_text, mode, error):
+    # Get terminal size
+    columns, height = shutil.get_terminal_size()
+
+    # Move to the bottom row, column 1
+    print(f"\033[{height};1H", end="")  # Position cursor
+    print(f"{ansi.RED}{error} {ansi.RESET}{mode} >> {input_text}{ansi.RESET}", end="", flush=True)
 
 def get_keypress():
     """

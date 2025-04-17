@@ -1,5 +1,7 @@
 import shutil, os, textwrap, sys, ansi
 import settings
+import signal
+import kbutils
 
 def print_kanban_columns(
     todo,
@@ -138,9 +140,102 @@ def display_kanban(user_settings, project_title: str):
     print_kanban_columns(todo, doing, done, project_title)
 
 def display_interactive_kanban(user_settings, project_title):
+    displayable_error = ""
+    mode = "CMD"
+    input_text = ""
+
     while True:
         display_kanban(user_settings, project_title)
         
-        # TODO add input interface options for kanban
-        input(">> ")
-        
+        kbutils.print_bottom_input_with_mode_and_error(input_text, mode, displayable_error)
+        key = kbutils.get_keypress()
+
+        # TODO once more modes are implemented, add checks, but for now it is just CMD
+        """
+        In CMD mode, the user can type the operations that they want to do:
+        Example:    "move 0" will move task with index 0 over a column.
+                    "move 0 doing" will move task with index 0 to the doing column.
+                    "delete 0" will delete the task with index 0.
+                    "0" will open the view interface for the task with index 0. (changes the view)
+                    "edit 0" will open the edit interface for task with index 0. (changes the view)
+                        - You can update different attributes of the task here.
+                        - You can create subtasks for the task.
+                    "create" will open the create task interface.
+                    "backlog" will show a list of backlog items (those not in the view)
+                    "complete" will delete all items that are in the done column.
+        """
+        if key == kbutils.EXIT_CMD:
+            print(f"{ansi.RED}Exiting Kanban CLI...{ansi.RESET}")
+            os.system('clear')
+            sys.exit(0)
+        elif key.isalnum() or key in (' ', '-', '_'):
+            input_text += key
+            displayable_error = ''
+        elif key in kbutils.KEY_BACKSPACE:  # Backspace
+            input_text = input_text[:-1]
+            displayable_error = ''
+        elif key in kbutils.KEY_ENTER:
+            command_parts = input_text.strip().split()
+            if not command_parts:
+                return
+
+            cmd = command_parts[0]
+            args = command_parts[1:]
+
+            if cmd == "move" or cmd == "mv":
+                if len(args) < 1 or not args[0].isdigit():
+                    displayable_error = "Usage: move <index> [column]"
+                else:
+                    task_index = int(args[0])
+                    destination = args[1] if len(args) > 1 else None
+
+                    error = settings.move_kanban_item_by_id(user_settings, project_title, task_index, destination)
+                    if error:
+                        displayable_error = error
+            elif cmd == "delete" or cmd == "del" or cmd == "remove":
+                if len(args) < 1 or not args[0].isdigit():
+                    continue
+                else:
+                    task_index = int(args[0])
+                    # TODO: call your delete_task(task_index) logic here
+                    pass
+            elif cmd == "edit":
+                if len(args) < 1 or not args[0].isdigit():
+                    continue
+                else:
+                    task_index = int(args[0])
+                    # TODO: switch to edit view for task_index
+                    pass
+            elif cmd == "create" or cmd == "new":
+                # TODO: open create task interface
+                pass
+            elif cmd == "backlog" or cmd == "bl":
+                # TODO: show backlog
+                pass
+            elif cmd == "complete":
+                # TODO: delete all items in the done column
+                pass
+            elif cmd == "home":
+                # TODO: go back to the main menu
+                pass
+            elif cmd == "quit":
+                # TODO: exit the program
+                pass
+            elif cmd.isdigit():
+                # TODO: open view for this task
+                task_index = int(cmd)
+                pass
+
+            # Reset input text
+            input_text = ''
+
+def handle_exit(signum, frame):
+    """
+    Handles exit signals (SIGINT, SIGHUP, SIGTERM) and ensures proper cleanup.
+    """
+    os.system("cls" if os.name == "nt" else "clear")
+    sys.exit(0)
+
+# Register signal handlers to handle_exit function
+signal.signal(signal.SIGHUP, handle_exit)   # Handle terminal close (Unix)
+signal.signal(signal.SIGTERM, handle_exit)  # Handle kill command
