@@ -1,3 +1,12 @@
+"""
+kanban.py
+author: narlock
+
+This file controls displaying the kanban interface to the user
+and handling actions from the user while the interface is being
+displayed.
+"""
+
 import shutil, os, textwrap, sys, ansi
 import settings
 import signal
@@ -14,7 +23,7 @@ def print_kanban_columns(
     clear_screen: bool = True
 ):
     """
-    Clear the screen and print a color‑coded, boxed Kanban board.
+    Clear the screen and print a color-coded, boxed Kanban board.
 
     • Lines  : red          (ansi.GREY)
     • Todo   : bright blue  (ansi.BRIGHT_BLUE)
@@ -194,11 +203,12 @@ def display_interactive_kanban(user_settings, project_title):
                         displayable_error = error
             elif cmd == "delete" or cmd == "del" or cmd == "remove":
                 if len(args) < 1 or not args[0].isdigit():
-                    continue
+                    displayable_error = "Usage: delete <index>"
                 else:
                     task_index = int(args[0])
-                    # TODO: call your delete_task(task_index) logic here
-                    pass
+                    error = settings.delete_kanban_item_by_id(user_settings, project_title, task_index)
+                    if error:
+                        displayable_error = error
             elif cmd == "edit":
                 if len(args) < 1 or not args[0].isdigit():
                     continue

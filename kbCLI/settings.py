@@ -169,3 +169,29 @@ def move_kanban_item_by_id(user_settings, project_title, item_id: int, column: s
 
     task["status"] = new_status
     update_settings(user_settings)
+
+def delete_kanban_item_by_id(user_settings, project_title: str, item_id: int):
+    """
+    Deletes the respective kanban item from the specified project.
+
+    Returns:
+        str: error message if something went wrong
+        None: on successful delete
+    """
+    # Get project
+    project = next((p for p in user_settings["projects"] if p["title"] == project_title), None)
+    if not project:
+        return "Project not found."
+    
+    # Ensure that the task exists in the project
+    task = next((t for t in project["tasks"] if t["id"] == item_id), None)
+    if not task:
+        return f"Task with id {item_id} not found."
+
+    # Find and delete the task
+    for index, task in enumerate(project['tasks']):
+        if item_id == task['id']:
+            del project['tasks'][index]
+    
+    # Persist changes to the settings model on disk
+    update_settings(user_settings)
