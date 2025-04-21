@@ -9,6 +9,9 @@ import ansi
 # Regex to remove ANSI escape sequences
 ANSI_ESCAPE = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
 
+
+STR_REGEX = r'^[A-Za-z0-9\s\-\_\.\$\{\}\!\@\#\%\^\&\*\(\)]+$'
+
 # Keybindings
 KEY_UP = "\x1b[A"
 KEY_DOWN = "\x1b[B"

@@ -14,6 +14,7 @@ SETTINGS_PATH = Path.home() / "Documents" / "narlock" / "kb" / "settings.json"
 
 INITIAL_SETTINGS = {
     "recentProjectTitle": "kb",
+    "nextId": 1,
     "projects": [
         {
             "id": 0,
@@ -55,6 +56,36 @@ INITIAL_SETTINGS = {
         }
     ]
 }
+
+DEFAULT_TASK = {
+    "id": -1,
+    "title": "",
+    "type": "story",
+    "description": "",
+    "acceptanceCriteria": "",
+    "priority": "medium",
+    "status": "backlog",
+    "effort": 0,
+    "startDate": "",
+    "completeDate": None,
+    "tags": [],
+    "fixVersion": "",
+    "linkedTasks": [],
+    "checklistItems": []
+}
+
+TASK_OPTIONS = [None, "Title", "Type", "Description", "Acceptance Criteria",
+                "Priority", "Status", "Effort", "Start Date", "Complete Date", "Fix Version",
+                "Tags", "Linked Tasks", "Checklist"]
+TASK_OPTION_KEYS = [None, "title", "type", "description", "acceptanceCriteria",
+                "priority", "status", "effort", "startDate", None, "fixVersion",
+                "tags", "linkedTasks", "checklistItems"]
+TASK_OPTION_TYPES = [None, "str", "type", "str", "str", 
+                    "priority", "status", "int", "date", None, "str",
+                    "list-str", "list-int"]
+TASK_TYPE_OPTIONS = ["story", "bug", "feature", "spike"]
+TASK_PRIORITY_TYPE_OPTIONS = ["very low", "low", "medium", "high", "very high", "critical"]
+TASK_STATUS_TYPE_OPTIONS = ["backlog", "todo", "doing", "done"]
 
 def write_initial_settings():
     """
@@ -170,6 +201,31 @@ def move_kanban_item_by_id(user_settings, project_title, item_id: int, column: s
     task["status"] = new_status
     update_settings(user_settings)
 
+def get_kanban_task_by_id(user_settings, project_title: str, item_id: int):
+    """
+    Retrieves a kanban task by ID from the specified project.
+
+    Args:
+        user_settings (dict): The full user settings data.
+        project_title (str): The title of the project.
+        item_id (int): The ID of the task to retrieve.
+
+    Returns:
+        dict: The task if found.
+        str: Error message if the project or task is not found.
+    """
+    # Get project
+    project = next((p for p in user_settings["projects"] if p["title"] == project_title), None)
+    if not project:
+        return "Project not found."
+
+    # Get task
+    task = next((t for t in project["tasks"] if t["id"] == item_id), None)
+    if not task:
+        return f"Task with id {item_id} not found."
+    
+    return task
+
 def delete_kanban_item_by_id(user_settings, project_title: str, item_id: int):
     """
     Deletes the respective kanban item from the specified project.
@@ -194,4 +250,24 @@ def delete_kanban_item_by_id(user_settings, project_title: str, item_id: int):
             del project['tasks'][index]
     
     # Persist changes to the settings model on disk
+    update_settings(user_settings)
+
+def add_kanban_task(user_settings, project_title: str, kanban_task):
+    """
+    Adds the kanban task to the user settings.
+    Assigns a unique ID based on user_settings["nextId"].
+    """
+    # Get project
+    project = next((p for p in user_settings["projects"] if p["title"] == project_title), None)
+    if not project:
+        return "Project not found."
+    
+    # Assign a unique ID to the new task
+    kanban_task["id"] = user_settings.get("nextId", 0)
+    user_settings["nextId"] = kanban_task["id"] + 1
+
+    # Add task to the project
+    project["tasks"].append(kanban_task)
+
+    # Persist changes to disk or wherever your update_settings function goes
     update_settings(user_settings)

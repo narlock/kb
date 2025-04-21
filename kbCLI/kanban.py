@@ -11,6 +11,7 @@ import shutil, os, textwrap, sys, ansi
 import settings
 import signal
 import kbutils
+import task_interface
 
 def print_kanban_columns(
     todo,
@@ -195,30 +196,34 @@ def display_interactive_kanban(user_settings, project_title):
                 if len(args) < 1 or not args[0].isdigit():
                     displayable_error = "Usage: move <index> [column]"
                 else:
-                    task_index = int(args[0])
+                    task_id = int(args[0])
                     destination = args[1] if len(args) > 1 else None
 
-                    error = settings.move_kanban_item_by_id(user_settings, project_title, task_index, destination)
+                    error = settings.move_kanban_item_by_id(user_settings, project_title, task_id, destination)
                     if error:
                         displayable_error = error
             elif cmd == "delete" or cmd == "del" or cmd == "remove":
                 if len(args) < 1 or not args[0].isdigit():
                     displayable_error = "Usage: delete <index>"
                 else:
-                    task_index = int(args[0])
-                    error = settings.delete_kanban_item_by_id(user_settings, project_title, task_index)
+                    task_id = int(args[0])
+                    error = settings.delete_kanban_item_by_id(user_settings, project_title, task_id)
                     if error:
                         displayable_error = error
             elif cmd == "edit":
                 if len(args) < 1 or not args[0].isdigit():
-                    continue
+                    displayable_error = "Usage: edit <index>"
                 else:
-                    task_index = int(args[0])
-                    # TODO: switch to edit view for task_index
-                    pass
+                    task_id = int(args[0])
+                    task = settings.get_kanban_task_by_id(user_settings, project_title, task_id)
+                    if isinstance(task, str):
+                        displayable_error = task
+                    elif isinstance(task, dict):
+                        task_interface.display_task_change_interface(user_settings, task)
+                    else:
+                        displayable_error = "An unexpected return type for task was returned."
             elif cmd == "create" or cmd == "new":
-                # TODO: open create task interface
-                pass
+                task_interface.display_task_change_interface(user_settings)
             elif cmd == "backlog" or cmd == "bl":
                 # TODO: show backlog
                 pass
@@ -233,7 +238,7 @@ def display_interactive_kanban(user_settings, project_title):
                 pass
             elif cmd.isdigit():
                 # TODO: open view for this task
-                task_index = int(cmd)
+                task_id = int(cmd)
                 pass
 
             # Reset input text
