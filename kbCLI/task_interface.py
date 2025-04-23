@@ -10,6 +10,7 @@ import os
 import kbutils
 import settings
 import re
+import copy
 
 def display_task_change_interface(user_settings, project_title, task = None):
     """
@@ -22,7 +23,7 @@ def display_task_change_interface(user_settings, project_title, task = None):
 
     if task is None:
         mode = "CREATE"
-        task = settings.DEFAULT_TASK
+        task = copy.deepcopy(settings.DEFAULT_TASK) # Ensure we are not referencing a single task!
         task_id = user_settings['nextId']
         task['id'] = task_id
 

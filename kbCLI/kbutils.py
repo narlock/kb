@@ -65,6 +65,10 @@ def print_bottom_input_with_mode_and_error(input_text, mode, error):
     # Get terminal size
     columns, height = shutil.get_terminal_size()
 
+    # Add space to error if applicable
+    if error:
+        error = f"{error} "
+
     # Move to the bottom row, column 1
     print(f"\033[{height};1H", end="")  # Position cursor
     print(f"{ansi.RED}{error}{ansi.RESET}{mode} >> {input_text}{ansi.RESET}", end="", flush=True)

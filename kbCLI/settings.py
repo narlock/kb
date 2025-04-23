@@ -226,6 +226,58 @@ def get_kanban_task_by_id(user_settings, project_title: str, item_id: int):
     
     return task
 
+def get_kanban_tasks(user_settings, project_title: str):
+    """
+    Returns the list of kanban tasks by specified project.
+
+    Returns:
+        dict: List of kanban tasks.
+        str: Error message if the project is not found.
+    """
+    # Get project
+    project = next((p for p in user_settings["projects"] if p["title"] == project_title), None)
+    if not project:
+        return "Project not found."
+    
+    # Get tasks
+    return project['tasks']
+
+def get_kanban_backlog_tasks(user_settings, project_title: str):
+    """
+    Returns a list of kanban tasks by a specified project. Where
+    the list will reference only items that have their status equal to
+    'backlog'.
+
+    Returns:
+        list: List of kanban tasks in the backlog.
+        str: Error message if the project is not found.
+    """
+    # Get project
+    project = next((p for p in user_settings["projects"] if p["title"] == project_title), None)
+    if not project:
+        return "Project not found."
+    
+    # Filter tasks with status 'backlog'
+    backlog_tasks = [task for task in project["tasks"] if task["status"] == "backlog"]
+    return backlog_tasks
+
+def get_backlog_task_ids(user_settings, project_title: str):
+    """
+    Returns a list of task IDs for tasks in the backlog by specified project.
+
+    Returns:
+        list: List of task IDs.
+        str: Error message if the project is not found.
+    """
+    # Get project
+    project = next((p for p in user_settings["projects"] if p["title"] == project_title), None)
+    if not project:
+        return "Project not found."
+    
+    # Extract IDs of tasks with status 'backlog'
+    backlog_ids = [task["id"] for task in project["tasks"] if task["status"] == "backlog"]
+    return backlog_ids
+
 def delete_kanban_item_by_id(user_settings, project_title: str, item_id: int):
     """
     Deletes the respective kanban item from the specified project.

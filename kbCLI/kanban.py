@@ -12,6 +12,7 @@ import settings
 import signal
 import kbutils
 import task_interface
+import re
 
 def print_kanban_columns(
     todo,
@@ -225,8 +226,12 @@ def display_interactive_kanban(user_settings, project_title):
             elif cmd == "create" or cmd == "new":
                 task_interface.display_task_change_interface(user_settings, project_title)
             elif cmd == "backlog" or cmd == "bl":
-                # TODO: show backlog
-                pass
+                # If there are no items in the backlog, don't display the interface.
+                backlog_items_length = len(settings.get_kanban_backlog_tasks(user_settings, project_title))
+                if (backlog_items_length > 0):
+                    display_backlog(user_settings, project_title)
+                else:
+                    displayable_error = "There are no backlog tasks!"
             elif cmd == "complete":
                 # TODO: delete all items in the done column
                 pass
@@ -243,6 +248,89 @@ def display_interactive_kanban(user_settings, project_title):
 
             # Reset input text
             input_text = ''
+
+def display_backlog(user_settings, project_title):
+    """
+    Displays the backlog and allows the user to move items
+    to the board.
+
+    CMD mode is the only supported mode in the backlog view.
+    Simply moving the UP and DOWN arrows will go between the
+    items in the backlog.
+
+    TODO in the future, we need to add some level of pagination
+    so that we can display an infinite number of kanban items
+    to the screen. We can use the LEFT and RIGHT arrow keys
+    to navigate between pages.
+    """
+    backlog_tasks = settings.get_kanban_backlog_tasks(user_settings, project_title)
+    backlog_task_id_list = settings.get_backlog_task_ids(user_settings, project_title)
+
+    mode = "CMD"
+    input_text = ""
+    displayable_error = ""
+    selected_index = 0
+
+    while True:
+        os.system('clear')
+        print(f"{ansi.ORANGE}{ansi.BOLD}{project_title} Backlog Tasks{ansi.RESET}")
+        print(f"{ansi.GREY}Use the `move` command to move tasks to the board.{ansi.RESET}\n")
+
+        # Prints the backlog tasks
+        for index, task in enumerate(backlog_tasks):
+            if backlog_task_id_list[selected_index] == task['id']:
+                print(f"{ansi.BRIGHT_GREEN}{ansi.BOLD}→ [{task['id']}] {task['title']}")
+            else:
+                print(f"{ansi.GREEN}[{task['id']}] {task['title']}")
+
+        # Await user input
+        kbutils.print_bottom_input_with_mode_and_error(input_text, mode, displayable_error)
+        key = kbutils.get_keypress()
+
+        if key == kbutils.EXIT_CMD:
+            # Return if we decide to exit
+            return
+        elif key == kbutils.KEY_UP:
+            displayable_error = ""
+            selected_index = (selected_index - 1) % len(backlog_tasks)
+        elif key == kbutils.KEY_DOWN:
+            displayable_error = ""
+            selected_index = (selected_index + 1) % len(backlog_tasks)
+        elif key in kbutils.KEY_ENTER:
+            command_parts = input_text.strip().split()
+            if not command_parts:
+                displayable_error = "View interface not implemented!"
+                continue
+
+            cmd = command_parts[0]
+            args = command_parts[1:]
+
+            if cmd == "move" or cmd == "mv":
+                if len(args) < 1 or not args[0].isdigit():
+                    displayable_error = "Usage: move <index> [column]"
+                else:
+                    task_id = int(args[0])
+                    destination = args[1] if len(args) > 1 else None
+
+                    error = settings.move_kanban_item_by_id(user_settings, project_title, task_id, destination)
+                    if error:
+                        displayable_error = error
+                    else:
+                        # Reset backlog items
+                        backlog_tasks = settings.get_kanban_backlog_tasks(user_settings, project_title)
+                        backlog_task_id_list = settings.get_backlog_task_ids(user_settings, project_title)
+            else:
+                displayable_error = f"Invalid command: {cmd}!"
+
+            input_text = ""
+        elif key in kbutils.KEY_BACKSPACE:
+            # Delete character from string if possible
+            displayable_error = ""
+            input_text = input_text[:-1]
+        elif re.fullmatch(kbutils.STR_REGEX, key):
+            # Add character from string
+            displayable_error = ""
+            input_text += key
 
 def handle_exit(signum, frame):
     """
