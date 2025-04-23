@@ -219,11 +219,11 @@ def display_interactive_kanban(user_settings, project_title):
                     if isinstance(task, str):
                         displayable_error = task
                     elif isinstance(task, dict):
-                        task_interface.display_task_change_interface(user_settings, task)
+                        task_interface.display_task_change_interface(user_settings, project_title, task)
                     else:
                         displayable_error = "An unexpected return type for task was returned."
             elif cmd == "create" or cmd == "new":
-                task_interface.display_task_change_interface(user_settings)
+                task_interface.display_task_change_interface(user_settings, project_title)
             elif cmd == "backlog" or cmd == "bl":
                 # TODO: show backlog
                 pass

@@ -52,13 +52,22 @@ def print_bottom_input(input_text):
     print(f"\033[{height};1H", end="")  # Position cursor
     print(f"{ansi.RESET}>> {input_text}{ansi.RESET}", end="", flush=True)
 
+def print_bottom_input_with_error(input_text, error):
+    # Get terminal size
+    columns, height = shutil.get_terminal_size()
+
+    # Move to the bottom row, column 1
+    print(f"\033[{height};1H", end="")  # Position cursor
+    print(f"{ansi.RED}{error}{ansi.RESET}>> {input_text}{ansi.RESET}", end="", flush=True)
+
+
 def print_bottom_input_with_mode_and_error(input_text, mode, error):
     # Get terminal size
     columns, height = shutil.get_terminal_size()
 
     # Move to the bottom row, column 1
     print(f"\033[{height};1H", end="")  # Position cursor
-    print(f"{ansi.RED}{error} {ansi.RESET}{mode} >> {input_text}{ansi.RESET}", end="", flush=True)
+    print(f"{ansi.RED}{error}{ansi.RESET}{mode} >> {input_text}{ansi.RESET}", end="", flush=True)
 
 def get_keypress():
     """

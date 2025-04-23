@@ -11,7 +11,7 @@ import kbutils
 import settings
 import re
 
-def display_task_change_interface(user_settings, task = None):
+def display_task_change_interface(user_settings, project_title, task = None):
     """
     Displays the task interface. If a task is passed to this, the
     interface will display the edit interface. Otherwise, it will
@@ -29,6 +29,7 @@ def display_task_change_interface(user_settings, task = None):
     while True:
         os.system('clear')
         selected_index = 1
+        printable_error = ""
 
         print(f"{ansi.ORANGE}{ansi.BOLD}{mode} Task\n")
 
@@ -50,13 +51,28 @@ def display_task_change_interface(user_settings, task = None):
             #     print(f"{ansi.GREEN}{settings.TASK_OPTIONS[index]}: {ansi.RESET}{task[option]}")
         
         input_option = settings.TASK_OPTION_TYPES[selected_index]
-        kbutils.print_bottom_input(f"({input_option}) ")
+        kbutils.print_bottom_input_with_error(f"({input_option}) {task[settings.TASK_OPTION_KEYS[selected_index]]}", printable_error)
         key = kbutils.get_keypress()
         # TODO Make it so when the arrow keys are pressed, the selected index changes
         if key == kbutils.EXIT_CMD:
             # Return if we decide to exit
             return
+        elif key in kbutils.KEY_ENTER:
+            # Validate then save the kanban item
+            # TODO update this when we have more options than title
+            if task['title'].strip() == '':
+                printable_error = "Title must not be blank!"
+            else:
+                if mode == 'CREATE':
+                    # Save the kanban item and go back to the board view
+                    settings.add_kanban_task(user_settings, project_title, task)
+                else:
+                    # Update existing task (should reference an already created task)
+                    settings.update_settings(user_settings)
+                # Go back to board view
+                return
         elif input_option == 'str':
+            printable_error = ''
             option_string = task[settings.TASK_OPTION_KEYS[selected_index]]
             if key in kbutils.KEY_BACKSPACE:
                 # Delete character from string if possible
