@@ -323,3 +323,24 @@ def add_kanban_task(user_settings, project_title: str, kanban_task):
 
     # Persist changes to disk or wherever your update_settings function goes
     update_settings(user_settings)
+
+def delete_all_done_kanban_tasks(user_settings, project_title: str):
+    """
+    Used for the "complete" operation, this function deletes
+    all of the tasks for the specified project where the 
+    status attribute is 'done'.
+
+    Returns:
+        str: Error message if the project is not found.
+        None: On successful deletion of tasks.
+    """
+    # Get project
+    project = next((p for p in user_settings["projects"] if p["title"] == project_title), None)
+    if not project:
+        return "Project not found."
+
+    # Filter out tasks that are not done
+    project["tasks"] = [task for task in project["tasks"] if task["status"] != "done"]
+
+    # Persist changes to disk or user settings
+    update_settings(user_settings)

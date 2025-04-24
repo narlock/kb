@@ -7,6 +7,7 @@ and handling actions from the user while the interface is being
 displayed.
 """
 
+import main
 import shutil, os, textwrap, sys, ansi
 import settings
 import signal
@@ -188,7 +189,8 @@ def display_interactive_kanban(user_settings, project_title):
         elif key in kbutils.KEY_ENTER:
             command_parts = input_text.strip().split()
             if not command_parts:
-                return
+                # Don't fail if the user just hits enter...
+                continue
 
             cmd = command_parts[0]
             args = command_parts[1:]
@@ -233,18 +235,18 @@ def display_interactive_kanban(user_settings, project_title):
                 else:
                     displayable_error = "There are no backlog tasks!"
             elif cmd == "complete":
-                # TODO: delete all items in the done column
-                pass
+                settings.delete_all_done_kanban_tasks(user_settings, project_title)
             elif cmd == "home":
-                # TODO: go back to the main menu
-                pass
+                main.interactive_menu(user_settings)
             elif cmd == "quit":
-                # TODO: exit the program
-                pass
+                os.system('clear')
+                sys.exit(0)
             elif cmd.isdigit():
                 # TODO: open view for this task
                 task_id = int(cmd)
-                pass
+                displayable_error = "View interface not implemented!"
+            else:
+                displayable_error = f"Invalid command input: {input_text}"
 
             # Reset input text
             input_text = ''
