@@ -272,7 +272,7 @@ def display_backlog(user_settings, project_title):
     to the screen. We can use the LEFT and RIGHT arrow keys
     to navigate between pages.
     """
-    backlog_tasks = settings.get_kanban_tasks_by_status(user_settings, project_title)
+    backlog_tasks = settings.get_kanban_tasks_by_status(user_settings, project_title, "backlog")
     backlog_task_id_list = settings.get_backlog_task_ids(user_settings, project_title)
 
     mode = "CMD"
@@ -326,7 +326,7 @@ def display_backlog(user_settings, project_title):
                         displayable_error = error
                     else:
                         # Reset backlog items
-                        backlog_tasks = settings.get_kanban_tasks_by_status(user_settings, project_title)
+                        backlog_tasks = settings.get_kanban_tasks_by_status(user_settings, project_title, "backlog")
                         backlog_task_id_list = settings.get_backlog_task_ids(user_settings, project_title)
             else:
                 displayable_error = f"Invalid command: {cmd}!"

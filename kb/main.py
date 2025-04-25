@@ -78,6 +78,8 @@ def interactive_menu(user_settings):
             if selected_index == 0:
                 kanban.display_interactive_kanban(user_settings, user_settings['recentProjectTitle'])
                 return
+            if selected_index == 1:
+                display_project_interactive_menu(user_settings)
             elif selected_index == 4:
                 os.system('clear')
                 sys.exit(0)
@@ -118,6 +120,15 @@ def get_title_text(user_settings, selected_index: int) -> str:
             lines.append(f"{ansi.GREEN}{item}{ansi.RESET}")
 
     return "\n".join(lines)
+
+def display_project_interactive_menu(user_settings):
+    """
+    Displays the project selection interface and allows the user
+    to choose which project they want to open.
+
+    When a user selects a project, the recentProjectTitle will be
+    updated based on the project that is opened.
+    """
 
 # Display help information
 def show_help():
