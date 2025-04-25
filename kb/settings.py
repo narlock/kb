@@ -242,14 +242,14 @@ def get_kanban_tasks(user_settings, project_title: str):
     # Get tasks
     return project['tasks']
 
-def get_kanban_backlog_tasks(user_settings, project_title: str):
+def get_kanban_tasks_by_status(user_settings, project_title: str, status: str):
     """
     Returns a list of kanban tasks by a specified project. Where
     the list will reference only items that have their status equal to
-    'backlog'.
+    the status argument.
 
     Returns:
-        list: List of kanban tasks in the backlog.
+        list: List of kanban tasks that are in the specified status.
         str: Error message if the project is not found.
     """
     # Get project
@@ -257,9 +257,9 @@ def get_kanban_backlog_tasks(user_settings, project_title: str):
     if not project:
         return "Project not found."
     
-    # Filter tasks with status 'backlog'
-    backlog_tasks = [task for task in project["tasks"] if task["status"] == "backlog"]
-    return backlog_tasks
+    # Filter tasks with status 'status'
+    status_tasks = [task for task in project["tasks"] if task["status"] == status]
+    return status_tasks
 
 def get_backlog_task_ids(user_settings, project_title: str):
     """
@@ -324,7 +324,7 @@ def add_kanban_task(user_settings, project_title: str, kanban_task):
     # Persist changes to disk or wherever your update_settings function goes
     update_settings(user_settings)
 
-def delete_all_done_kanban_tasks(user_settings, project_title: str):
+def archive_completed_kanban_tasks(user_settings, project_title: str):
     """
     Used for the "complete" operation, this function deletes
     all of the tasks for the specified project where the 
@@ -340,7 +340,9 @@ def delete_all_done_kanban_tasks(user_settings, project_title: str):
         return "Project not found."
 
     # Filter out tasks that are not done
-    project["tasks"] = [task for task in project["tasks"] if task["status"] != "done"]
+    for task in project["tasks"]:
+        if task["status"] == "done":
+            task["status"] = "archived"
 
     # Persist changes to disk or user settings
     update_settings(user_settings)

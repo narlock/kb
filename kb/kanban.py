@@ -35,18 +35,18 @@ def print_kanban_columns(
     """
     line_color = ansi.GREY
 
-    # ── 0. Clear screen ────────────────────────────────────────────────────
+    # 0. Clear screen
     if clear_screen:
         os.system("cls" if os.name == "nt" else "clear")
 
-    # ── 1. Terminal geometry ──────────────────────────────────────────────
+    # 1. Terminal geometry 
     term_cols, term_rows = shutil.get_terminal_size(fallback=(80, 24))
     usable_cols = max(term_cols - 4, min_col_width * 3)           # 4 borders (┌││┐)
     base, extra = divmod(usable_cols, 3)
     col_widths = [max(min_col_width, base + (1 if i < extra else 0)) for i in range(3)]
     board_width = sum(col_widths) + 4                             # 3 inner + 2 outer bars
 
-    # ── 2. Column metadata ────────────────────────────────────────────────
+    # 2. Column metadata
     cols = [
         ("Todo",  list(todo),  ansi.BRIGHT_BLUE),
         ("Doing", list(doing), ansi.ORANGE),
@@ -57,20 +57,20 @@ def print_kanban_columns(
         tid, tname = (task["id"], task["name"]) if isinstance(task, dict) else task
         return f"[{tid}] {tname}"
 
-    # ── 3. Box‑drawing helpers (all red) -----------------------------------
+    # 3. Box‑drawing helpers
     V = lambda ch="│": f"{line_color}{ch}{ansi.RESET}"
     H = lambda n:       f"{line_color}{'─'*n}{ansi.RESET}"
     def join_h(parts, mid):
         return f"{line_color}{mid}{ansi.RESET}".join(parts)
 
-    # Top border: ┌──┬──┬──┐
+    # 3a. Top border: ┌──┬──┬──┐
     top_border = (
         V("┌") +
         join_h([H(w) for w in col_widths], "┬") +
         V("┐")
     )
 
-    # Mid border (under header): ├──┼──┼──┤
+    # 3b. Mid border (under header): ├──┼──┼──┤
     mid_border = (
         V("├") +
         join_h([H(w) for w in col_widths], "┼") +
@@ -80,7 +80,7 @@ def print_kanban_columns(
     # Vertical separator used inside rows
     V_SEP = V("│")
 
-    # ── 4. Collect all lines ------------------------------------------------
+    # 4. Collect all lines
     lines = []
 
     # 4a. Project title + full‑width red rule
@@ -229,13 +229,20 @@ def display_interactive_kanban(user_settings, project_title):
                 task_interface.display_task_change_interface(user_settings, project_title)
             elif cmd == "backlog" or cmd == "bl":
                 # If there are no items in the backlog, don't display the interface.
-                backlog_items_length = len(settings.get_kanban_backlog_tasks(user_settings, project_title))
+                backlog_items_length = len(settings.get_kanban_tasks_by_status(user_settings, project_title, "backlog"))
                 if (backlog_items_length > 0):
                     display_backlog(user_settings, project_title)
                 else:
                     displayable_error = "There are no backlog tasks!"
+            elif cmd == "archive" or cmd == "arc":
+                # If there are no items archived, don't display the interface.
+                archived_items_length = len(settings.get_kanban_tasks_by_status(user_settings, project_title, "archived"))
+                if (archived_items_length > 0):
+                    display_archive(user_settings, project_title)
+                else:
+                    displayable_error = "There are no archived tasks!"
             elif cmd == "complete":
-                settings.delete_all_done_kanban_tasks(user_settings, project_title)
+                settings.archive_completed_kanban_tasks(user_settings, project_title)
             elif cmd == "home":
                 main.interactive_menu(user_settings)
             elif cmd == "quit":
@@ -265,7 +272,7 @@ def display_backlog(user_settings, project_title):
     to the screen. We can use the LEFT and RIGHT arrow keys
     to navigate between pages.
     """
-    backlog_tasks = settings.get_kanban_backlog_tasks(user_settings, project_title)
+    backlog_tasks = settings.get_kanban_tasks_by_status(user_settings, project_title)
     backlog_task_id_list = settings.get_backlog_task_ids(user_settings, project_title)
 
     mode = "CMD"
@@ -319,7 +326,7 @@ def display_backlog(user_settings, project_title):
                         displayable_error = error
                     else:
                         # Reset backlog items
-                        backlog_tasks = settings.get_kanban_backlog_tasks(user_settings, project_title)
+                        backlog_tasks = settings.get_kanban_tasks_by_status(user_settings, project_title)
                         backlog_task_id_list = settings.get_backlog_task_ids(user_settings, project_title)
             else:
                 displayable_error = f"Invalid command: {cmd}!"
@@ -333,6 +340,12 @@ def display_backlog(user_settings, project_title):
             # Add character from string
             displayable_error = ""
             input_text += key
+
+def display_archive():
+    """
+    TODO
+    """
+    pass
 
 def handle_exit(signum, frame):
     """

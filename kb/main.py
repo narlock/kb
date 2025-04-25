@@ -18,7 +18,7 @@ import kanban
 # Development information
 DEV_NAME = "narlock"
 GITHUB_LINK = "https://github.com/narlock"
-REPO_LINK = "https://github.com/narlock/kbCLI"
+REPO_LINK = "https://github.com/narlock/kb"
 TITLE = f"{ansi.ORANGE}{ansi.BOLD}Kanban CLI"
 CONTROLS = f"{ansi.BLUE}←↑↓→ Navigate, ENTER to Confirm, Type for New Board, Ctrl+C to Exit"
 
@@ -27,7 +27,7 @@ HELP_CMD = "-help"
 EXIT_CMD = "\x03"  # Ctrl+Q
 
 # Board data storage location
-BOARDS_DIR = os.path.expanduser("~/Documents/narlock/kbCLI")
+BOARDS_DIR = os.path.expanduser("~/Documents/narlock/kb")
 
 # Keybindings
 KEY_UP = "\x1b[A"
@@ -78,6 +78,9 @@ def interactive_menu(user_settings):
             if selected_index == 0:
                 kanban.display_interactive_kanban(user_settings, user_settings['recentProjectTitle'])
                 return
+            elif selected_index == 4:
+                os.system('clear')
+                sys.exit(0)
         elif key.isalnum() or key in (' ', '-', '_'):
             input_text += key
         elif key in KEY_BACKSPACE:  # Backspace
