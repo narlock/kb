@@ -73,12 +73,18 @@ def interactive_menu(user_settings):
             sys.exit(0)
         elif key == KEY_UP:  # Up arrow
             selected_index = (selected_index - 1) % 5
+            displayable_error = ""
         elif key == KEY_DOWN:  # Down arrow
             selected_index = (selected_index + 1) % 5
+            displayable_error = ""
         elif key in KEY_ENTER:  # Enter key
             if selected_index == 0:
-                kanban.display_interactive_kanban(user_settings, user_settings['recentProjectTitle'])
-                return
+                if user_settings['recentProjectTitle'] is None:
+                    # Open the project interactive interface
+                    display_project_interactive_menu(user_settings)
+                else:
+                    kanban.display_interactive_kanban(user_settings, user_settings['recentProjectTitle'])
+                    return
             elif selected_index == 1:
                 display_project_interactive_menu(user_settings)
             elif selected_index == 2:
@@ -118,8 +124,10 @@ def interactive_menu(user_settings):
                 sys.exit(0)
         elif key.isalnum() or key in (' ', '-', '_'):
             input_text += key
+            displayable_error = ""
         elif key in KEY_BACKSPACE:  # Backspace
             input_text = input_text[:-1]
+            displayable_error = ""
 
 def get_title_text(user_settings, selected_index: int) -> str:
     """Return the banner + menu, with the selected line in bright-green bold."""
@@ -163,6 +171,10 @@ def display_project_interactive_menu(user_settings):
     updated based on the project that is opened.
     """
     project_ids = settings.get_project_ids(user_settings)
+    if len(project_ids) == 0:
+        return
+
+    input_message = ""
     selected_index = 0
     current_project_title = ""
 
@@ -170,7 +182,7 @@ def display_project_interactive_menu(user_settings):
         os.system('clear')
         print(f"{ansi.ORANGE}{ansi.BOLD}Projects\n")
 
-        for index, project in enumerate(user_settings['projects']):
+        for project in user_settings['projects']:
             if project_ids[selected_index] == project['id']:
                 print(f"{ansi.BRIGHT_GREEN}{ansi.BOLD}→ {project['title']}{ansi.RESET}")
                 current_project_title = project['title']
@@ -178,21 +190,45 @@ def display_project_interactive_menu(user_settings):
                 print(f"{ansi.GREEN}{project['title']}{ansi.RESET}")
 
         # Await user input
-        kbutils.print_bottom_input("")
+        kbutils.print_bottom_input(input_message)
         key = kbutils.get_keypress()
 
         if key == kbutils.EXIT_CMD:
             return
         elif key in kbutils.KEY_ENTER:
-            # Open the kanban project
-            user_settings['recentProjectTitle'] = current_project_title
-            settings.update_settings(user_settings)
-            kanban.display_interactive_kanban(user_settings, user_settings['recentProjectTitle'])
-            return
+            if "Delete project" in input_message:
+                # Delete the current project by current project title
+                input_message = ""
+                settings.delete_project_by_title(user_settings, current_project_title)
+
+                # Ensure that deletion does not cause recentProject conflicts
+                if user_settings['recentProjectTitle'] == current_project_title:
+                    user_settings['recentProjectTitle'] = None
+                    settings.update_settings(user_settings)
+
+                # Update the current interface
+                project_ids = settings.get_project_ids(user_settings)
+                selected_index = 0
+
+                # Exit if there are no projects
+                if len(project_ids) == 0:
+                    return
+                
+                continue
+            else:
+                # Open the kanban project
+                user_settings['recentProjectTitle'] = current_project_title
+                settings.update_settings(user_settings)
+                kanban.display_interactive_kanban(user_settings, user_settings['recentProjectTitle'])
+                return
         elif key == kbutils.KEY_DOWN:
             selected_index = (selected_index - 1) % len(project_ids)
+            input_message = ""
         elif key == kbutils.KEY_UP:
             selected_index = (selected_index + 1) % len(project_ids)
+            input_message = ""
+        elif key in kbutils.KEY_BACKSPACE:
+            input_message = f"{ansi.RED}Delete project {current_project_title}? {ansi.GREY}Press ENTER to confirm...{ansi.RESET}"
 
 # Display help information
 def show_help():

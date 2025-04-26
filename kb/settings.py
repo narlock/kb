@@ -382,3 +382,19 @@ def get_project_ids(user_settings):
     Used for determining the selected index.
     """
     return [project['id'] for project in user_settings['projects']]
+
+def delete_project_by_title(user_settings, project_title: str):
+    """
+    Deletes a kanban project given its project_title.
+
+    Returns False if unable to delete by the title, meaning it does not exist.
+    Returns True if the operation was successful.
+    """
+    project_index = next((i for i, p in enumerate(user_settings["projects"]) if p["title"] == project_title), None)
+    if project_index is None:
+        return False
+
+    # Delete the project
+    del user_settings["projects"][project_index]
+    update_settings(user_settings)
+    return True

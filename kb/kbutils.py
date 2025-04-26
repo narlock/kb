@@ -17,6 +17,7 @@ KEY_UP = "\x1b[A"
 KEY_DOWN = "\x1b[B"
 KEY_ENTER = ('\r', '\n')
 KEY_BACKSPACE = ('\x08', '\x7f')
+KEY_ESC = "\x1b"
 EXIT_CMD = "\x03"  # Ctrl+C
 
 def strip_ansi(text):
