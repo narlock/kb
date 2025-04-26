@@ -50,6 +50,7 @@ def default_board_structure(name):
 def interactive_menu(user_settings):
     selected_index = 0
     input_text = ""
+    displayable_error = ""
 
     while True:
         os.system('clear')
@@ -62,7 +63,7 @@ def interactive_menu(user_settings):
 
         
         # Move cursor to the bottom of the screen
-        kbutils.print_bottom_input(input_text)
+        kbutils.print_bottom_input_with_error(input_text, displayable_error)
         
         key = kbutils.get_keypress()
         
@@ -81,7 +82,37 @@ def interactive_menu(user_settings):
             elif selected_index == 1:
                 display_project_interactive_menu(user_settings)
             elif selected_index == 2:
-                display_create_project_interface(user_settings)
+                """
+                Creating a kanban project is intuitive... Simply just type
+                the name of the project you want to create, then go under
+                this option on the main menu. It will create a new project
+                where the input_text is the project.
+                """
+                # Strip the text to get rid of unneeded whitespace
+                input_text = input_text.strip()
+
+                # Ensure that input_text is not blank
+                if not input_text:
+                    displayable_error = "Please enter a Kanban title for creation!"
+                    continue
+                
+                # Ensure that the input_text is a unique Kanban title - it doesn't already exist
+                if settings.kanban_project_exists(user_settings, input_text):
+                    displayable_error = "Project already exists!"
+                    continue
+
+                # Create new project with the project title and save
+                project = {
+                    "id": user_settings['nextProjectId'],
+                    "title": input_text,
+                    "tasks": []
+                }
+                user_settings['nextProjectId'] = user_settings['nextProjectId'] + 1
+                user_settings['projects'].append(project)
+                user_settings['recentProjectTitle'] = project['title']
+                settings.update_settings(user_settings)
+                kanban.display_interactive_kanban(user_settings, user_settings['recentProjectTitle'])
+                return
             elif selected_index == 4:
                 os.system('clear')
                 sys.exit(0)
@@ -131,16 +162,37 @@ def display_project_interactive_menu(user_settings):
     When a user selects a project, the recentProjectTitle will be
     updated based on the project that is opened.
     """
+    project_ids = settings.get_project_ids(user_settings)
+    selected_index = 0
+    current_project_title = ""
 
-def display_create_project_interface(user_settings):
-    """
-    Displays a simple Kanban project creation interface that
-    allows the user to create a new Kanban project.
+    while True:
+        os.system('clear')
+        print(f"{ansi.ORANGE}{ansi.BOLD}Projects\n")
 
-    When the user creates the Kanban project, it will become
-    the recentProjectTitle and it will automatically be opened
-    after the project is created.
-    """
+        for index, project in enumerate(user_settings['projects']):
+            if project_ids[selected_index] == project['id']:
+                print(f"{ansi.BRIGHT_GREEN}{ansi.BOLD}→ {project['title']}{ansi.RESET}")
+                current_project_title = project['title']
+            else:
+                print(f"{ansi.GREEN}{project['title']}{ansi.RESET}")
+
+        # Await user input
+        kbutils.print_bottom_input("")
+        key = kbutils.get_keypress()
+
+        if key == kbutils.EXIT_CMD:
+            return
+        elif key in kbutils.KEY_ENTER:
+            # Open the kanban project
+            user_settings['recentProjectTitle'] = current_project_title
+            settings.update_settings(user_settings)
+            kanban.display_interactive_kanban(user_settings, user_settings['recentProjectTitle'])
+            return
+        elif key == kbutils.KEY_DOWN:
+            selected_index = (selected_index - 1) % len(project_ids)
+        elif key == kbutils.KEY_UP:
+            selected_index = (selected_index + 1) % len(project_ids)
 
 # Display help information
 def show_help():

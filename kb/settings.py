@@ -19,11 +19,6 @@ INITIAL_SETTINGS = {
         {
             "id": 0,
             "title": "kb",
-            "description": "This is the project description",
-            "status": "todo",
-            "tags": [ "tag1" ],
-            "startDate": "2025-04-10",
-            "completeDate": None,
             "nextTaskId": 1,
             "tasks": [
                 {
@@ -59,7 +54,9 @@ INITIAL_SETTINGS = {
 }
 
 DEFAULT_PROJECT = {
-
+    "id": -1,
+    "title": "",
+    "tasks": []
 }
 
 DEFAULT_TASK = {
@@ -367,3 +364,21 @@ def get_next_task_id(user_settings, project_title: str):
         return "Project not found."
 
     return project['nextTaskId']
+
+def kanban_project_exists(user_settings, project_title: str):
+    """
+    Returns True if the Kanban project already exists within user settings.
+    Returns False if the project does not exist.
+    """
+    project = next((p for p in user_settings["projects"] if p["title"] == project_title), None)
+    if not project:
+        return False
+    
+    return True
+
+def get_project_ids(user_settings):
+    """
+    Returns a list of project ids as they appear in user settings.
+    Used for determining the selected index.
+    """
+    return [project['id'] for project in user_settings['projects']]
