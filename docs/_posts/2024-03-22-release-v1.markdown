@@ -1,0 +1,17 @@
+---
+layout: post
+title:  "kb v1.0.0"
+date:   2025-04-26 12:15:00 -0500
+categories: jekyll update
+---
+
+Release on GitHub can be found [here](https://github.com/narlock/kb/releases/tag/v1.0.0).
+
+## Introducing kb
+This section is in progress...
+
+## Features Implemented
+This section is in progress...
+
+## Installing
+Installing is made very simple. However, it is only available currently for Mac OS and Linux computer systems. Simply give permission to the `install.sh` script and execute. More information for installing can be found in the [install guide](https://pomo.narlock.dev/install/).
