@@ -78,8 +78,10 @@ def interactive_menu(user_settings):
             if selected_index == 0:
                 kanban.display_interactive_kanban(user_settings, user_settings['recentProjectTitle'])
                 return
-            if selected_index == 1:
+            elif selected_index == 1:
                 display_project_interactive_menu(user_settings)
+            elif selected_index == 2:
+                display_create_project_interface(user_settings)
             elif selected_index == 4:
                 os.system('clear')
                 sys.exit(0)
@@ -128,6 +130,16 @@ def display_project_interactive_menu(user_settings):
 
     When a user selects a project, the recentProjectTitle will be
     updated based on the project that is opened.
+    """
+
+def display_create_project_interface(user_settings):
+    """
+    Displays a simple Kanban project creation interface that
+    allows the user to create a new Kanban project.
+
+    When the user creates the Kanban project, it will become
+    the recentProjectTitle and it will automatically be opened
+    after the project is created.
     """
 
 # Display help information

@@ -14,7 +14,7 @@ SETTINGS_PATH = Path.home() / "Documents" / "narlock" / "kb" / "settings.json"
 
 INITIAL_SETTINGS = {
     "recentProjectTitle": "kb",
-    "nextId": 1,
+    "nextProjectId": 1,
     "projects": [
         {
             "id": 0,
@@ -24,6 +24,7 @@ INITIAL_SETTINGS = {
             "tags": [ "tag1" ],
             "startDate": "2025-04-10",
             "completeDate": None,
+            "nextTaskId": 1,
             "tasks": [
                 {
                     "id": 0,
@@ -55,6 +56,10 @@ INITIAL_SETTINGS = {
             ]
         }
     ]
+}
+
+DEFAULT_PROJECT = {
+
 }
 
 DEFAULT_TASK = {
@@ -307,7 +312,7 @@ def delete_kanban_item_by_id(user_settings, project_title: str, item_id: int):
 def add_kanban_task(user_settings, project_title: str, kanban_task):
     """
     Adds the kanban task to the user settings.
-    Assigns a unique ID based on user_settings["nextId"].
+    Assigns a unique ID based on project["nextTaskId"].
     """
     # Get project
     project = next((p for p in user_settings["projects"] if p["title"] == project_title), None)
@@ -315,8 +320,8 @@ def add_kanban_task(user_settings, project_title: str, kanban_task):
         return "Project not found."
     
     # Assign a unique ID to the new task
-    kanban_task["id"] = user_settings.get("nextId", 0)
-    user_settings["nextId"] = kanban_task["id"] + 1
+    kanban_task["id"] = project.get("nextTaskId", 0)
+    project["nextTaskId"] = kanban_task["id"] + 1
 
     # Add task to the project
     project["tasks"].append(kanban_task)
@@ -346,3 +351,19 @@ def archive_completed_kanban_tasks(user_settings, project_title: str):
 
     # Persist changes to disk or user settings
     update_settings(user_settings)
+
+def get_next_task_id(user_settings, project_title: str):
+    """
+    Retrieves the next task id given the user_settings and
+    project title as arguments.
+
+    Returns:
+        str: Error message if the project is not found.
+        int: The next task ID.
+    """
+    # Get project
+    project = next((p for p in user_settings["projects"] if p["title"] == project_title), None)
+    if not project:
+        return "Project not found."
+
+    return project['nextTaskId']
