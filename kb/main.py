@@ -111,6 +111,7 @@ def interactive_menu(user_settings):
                 project = {
                     "id": user_settings['nextProjectId'],
                     "title": input_text,
+                    "nextTaskId": 0,
                     "tasks": []
                 }
                 user_settings['nextProjectId'] = user_settings['nextProjectId'] + 1
