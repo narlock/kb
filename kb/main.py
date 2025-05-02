@@ -182,6 +182,8 @@ def display_project_interactive_menu(user_settings):
     while True:
         os.system('clear')
         print(f"{ansi.ORANGE}{ansi.BOLD}Projects\n")
+        # Debugging
+        # print(f"{ansi.ORANGE}{ansi.BOLD}Projects [project_ids={project_ids}, selected_index={selected_index}]\n")
 
         for project in user_settings['projects']:
             if project_ids[selected_index] == project['id']:
@@ -223,10 +225,10 @@ def display_project_interactive_menu(user_settings):
                 kanban.display_interactive_kanban(user_settings, user_settings['recentProjectTitle'])
                 return
         elif key == kbutils.KEY_DOWN:
-            selected_index = (selected_index - 1) % len(project_ids)
+            selected_index = (selected_index + 1) % len(project_ids)
             input_message = ""
         elif key == kbutils.KEY_UP:
-            selected_index = (selected_index + 1) % len(project_ids)
+            selected_index = (selected_index - 1) % len(project_ids)
             input_message = ""
         elif key in kbutils.KEY_BACKSPACE:
             input_message = f"{ansi.RED}Delete project {current_project_title}? {ansi.GREY}Press ENTER to confirm...{ansi.RESET}"
